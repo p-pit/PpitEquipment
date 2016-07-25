@@ -1,0 +1,312 @@
+<?php
+$spa = $context->isSpaMode();
+$anchorStyle = ($spa) ? $context->getAnchorStyle() : 'classic';
+?>
+			<h3 style="color: red">Une simulation est en cours sur cette zone</h3>
+
+			<table class="table ppit_index">
+					<tr>
+						<th>&nbsp;</th>
+						<th><?php echo $this->translate('Category', 'ppit-master-data', $context->getLocale()) ?></th>
+						<th><?php echo $this->translate('Model', 'ppit-master-data', $context->getLocale()) ?></th>
+						<th style="text-align: right">€ <?php echo $this->translate('Excl. options', 'ppit-master-data', $context->getLocale()) ?></th>
+						<th style="text-align: right">€ <?php echo $this->translate('With options', 'ppit-master-data', $context->getLocale()) ?></th>
+					</tr>
+					
+<?php $currentSum = 0; $targetSum = 0; $currentIncludingOptionSum = 0; $targetIncludingOptionSum = 0; ?>
+
+<!-- Policy equipments -->
+<?php foreach ($area->policyEquipments as $productCategory => $equipment) : ?>
+				<tr class="equipment"<?php if ($equipment->what_if_action == "delete" || $equipment->what_if_action == "move") echo ' style="text-decoration: line-through"' ?>>
+					<td>
+<!-- What-if -->
+						<?php echo $this->partial('/partials/action-widget.phtml', array(
+								'context' => $context,
+								'target' => 'equipment-update',
+								'id' => 'equipment-anchor-'.$equipment->id,
+								'glyphicon' => 'glyphicon-edit',
+								'class' => 'equipment-glyph',
+								'title' => $this->translate('What-if', 'ppit-equipment', $context->getLocale()),
+								'disabled' => $equipment->lock,
+								'route' => 'equipment/update',
+								'params' => array('area_id' => $equipment->area_id, 'product_category_id' => 0, 'id' => $equipment->id),
+						)) ?>
+					</td>
+					<td><?php echo $equipment->product_category_caption ?></td>
+<!-- What-if for a replacement -->
+	<?php if ($equipment->what_if_action == "change") : ?>
+					<td>
+						<span style="text-decoration: line-through">
+							<?php echo $equipment->product_brand.' - '.$equipment->product_caption ?>
+						</span>
+						<br>
+						<span style="color: red"><?php echo $equipment->targetProduct->brand.' - '.$equipment->targetProduct->caption ?></span>
+						<br>
+						<span style="font-size: 80%"><?php $first = true; foreach ($equipment->options as $option) {
+							if (!$first) echo ', ';
+							$first = false;
+							echo $option['caption'];
+						}?></span>
+					</td>
+					<td style="text-align: right">
+						<span style="text-decoration: line-through">
+							<?php echo $context->formatFloat($equipment->rent, 2) ?>
+						</span>
+						<span style="color: red"><?php echo $context->formatFloat($equipment->target_rent, 2) ?></span>
+					</td>
+					<td style="text-align: right">
+						<span style="text-decoration: line-through">
+							<?php echo $context->formatFloat($equipment->including_option_rent, 2) ?>
+						</span>
+						<span style="color: red"><?php echo $context->formatFloat($equipment->target_rent + $equipment->option_rent, 2) ?></span>
+					</td>
+	<?php else : ?>
+					<td>
+						<span<?php if ($equipment->what_if_action == "add") echo ' style="color: red"'?>><?php echo $equipment->product_brand.' - '.$equipment->product_caption ?></span>
+						<br>
+						<span style="font-size: 80%"><?php $first = true; foreach ($equipment->options as $option) {
+							if (!$first) echo ', ';
+							$first = false;
+							echo $option['caption'];
+						}?></span>
+					</td>
+					<?php ?><td style="text-align: right;<?php if ($equipment->what_if_action == "add") echo ' color: red'?>">
+						<?php echo $context->formatFloat($equipment->rent, 2) ?>
+					</td>
+					<td style="text-align: right;<?php if ($equipment->what_if_action == "add") echo ' color: red'?>">
+						<?php echo $context->formatFloat($equipment->including_option_rent, 2) ?>
+					</td>
+	<?php endif;?>
+					</tr>
+	<?php
+	if ($equipment->what_if_action != 'add') {
+		$currentSum += $equipment->rent;
+		$currentIncludingOptionSum += $equipment->including_option_rent;
+	}
+
+	if (!$equipment->what_if_action) {
+	    $targetSum += $equipment->rent;
+    	$targetIncludingOptionSum += $equipment->including_option_rent;
+	}
+	elseif ($equipment->what_if_action == 'change') {
+		$targetSum += $equipment->target_rent;
+    	$targetIncludingOptionSum += $equipment->target_rent + $equipment->option_rent;
+	}
+	elseif ($equipment->what_if_action == 'add') {
+		$targetSum += $equipment->rent;
+    	$targetIncludingOptionSum += $equipment->rent + $equipment->option_rent;
+	}
+	?>
+    
+<?php endforeach ?>
+
+<!-- Policy slots -->
+<?php foreach ($area->policySlots as $i => $productCategory) : ?>
+				<tr class="equipment inactive">
+<!-- Add -->
+					<td>
+						<?php echo $this->partial('/partials/action-widget.phtml', array(
+								'context' => $context,
+								'target' => 'equipment-update',
+								'id' => 'equipment-add-anchor-'.$i,
+								'glyphicon' => 'glyphicon-plus',
+								'class' => 'equipment-glyph',
+								'title' => $this->translate('Add', 'ppit-equipment', $context->getLocale()),
+								'route' => 'equipment/add',
+								'params' => array('area_id' => $area->id, 'product_category_id' => $productCategory->id),
+						)) ?>
+					</td>
+					<td colspan="4"><?php echo $productCategory->caption ?></td>
+				</tr>
+
+<?php endforeach ?>
+
+<tr><td class="caption" colspan="6"><a id="extra-policy-anchor" href="#"><?php echo $this->translate('Extra use policy', 'ppit-equipment', $context->getLocale())?></a></td></tr>
+
+				<tr class="equipment extra_policy">
+<!-- Add -->
+					<td>
+						<?php echo $this->partial('/partials/action-widget.phtml', array(
+								'context' => $context,
+								'target' => 'equipment-update',
+								'id' => 'equipment-add-anchor',
+								'glyphicon' => 'glyphicon-plus',
+								'class' => 'equipment-glyph',
+								'title' => $this->translate('Add', 'ppit-equipment', $context->getLocale()),
+								'route' => 'equipment/add',
+								'params' => array('area_id' => $area->id),
+						)) ?>
+					</td>
+					<td colspan="4">&nbsp;</td>
+				</tr>
+				
+<!-- Extra policy Equipments -->
+<?php foreach ($area->extraPolicyEquipments as $equipment) : ?>
+
+				<tr class="equipment extra_policy"<?php if ($equipment->what_if_action == "delete" || $equipment->what_if_action == "move") echo ' style="text-decoration: line-through"' ?>>
+<!-- What-if -->
+					<td>
+						<?php echo $this->partial('/partials/action-widget.phtml', array(
+								'context' => $context,
+								'target' => 'equipment-update',
+								'id' => 'equipment-anchor-'.$equipment->id,
+								'glyphicon' => 'glyphicon-edit',
+								'class' => 'equipment-glyph',
+								'title' => $this->translate('What-if', 'ppit-equipment', $context->getLocale()),
+								'route' => 'equipment/update',
+								'params' => array('area_id' => $equipment->area_id, 'product_category_id' => 0, 'id' => $equipment->id),
+						)) ?>
+					</td>
+					<td><?php echo $equipment->product_category_caption ?></td>
+<!-- What-if for a replacement -->
+	<?php if ($equipment->what_if_action == "change") : ?>
+					<td>
+						<span style="text-decoration: line-through"' ?>>
+							<?php echo $equipment->product_brand.' - '.$equipment->product_caption ?>
+							<br>
+							<span style="font-size: 80%; color: red"><?php $first = true; foreach ($equipment->options as $option) {
+								if (!$first) echo ', ';
+								$first = false;
+								echo $option['caption'];
+							}?></span>
+							<br>
+						</span>
+						<?php echo $equipment->targetProduct->brand.' - '.$equipment->targetProduct->caption ?>
+					</td>
+					<td style="text-align: right">
+						<span style="text-decoration: line-through">
+							<?php echo $context->formatFloat($equipment->rent, 2) ?>
+						</span>
+						<?php echo $context->formatFloat($equipment->target_rent, 2) ?>
+					</td>
+					<td style="text-align: right">
+						<span style="text-decoration: line-through">
+							<?php echo $context->formatFloat($equipment->including_option_rent, 2) ?>
+						</span>
+						<?php echo $context->formatFloat($equipment->target_rent + $equipment->option_rent, 2) ?>
+					</td>
+	<?php else : ?>
+					<td>
+						<?php echo $equipment->product_brand.' - '.$equipment->product_caption ?>
+						<br>
+						<span style="font-size: 80%"><?php $first = true; foreach ($equipment->options as $option) {
+							if (!$first) echo ', ';
+							$first = false;
+							echo $option['caption'];
+						}?></span>
+						<br>
+					</td>
+					<td style="text-align: right">
+						<?php echo $context->formatFloat($equipment->rent, 2) ?>
+					</td>
+					<td style="text-align: right">
+						<?php echo $context->formatFloat($equipment->including_option_rent, 2) ?>
+					</td>
+	<?php endif;?>
+				</tr>
+	<?php
+	if ($equipment->what_if_action != 'add') {
+		$currentSum += $equipment->rent;
+		$currentIncludingOptionSum += $equipment->including_option_rent;
+	}
+	
+	if (!$equipment->what_if_action) {
+	    $targetSum += $equipment->rent;
+    	$targetIncludingOptionSum += $equipment->including_option_rent;
+	}
+	elseif ($equipment->what_if_action == 'change') {
+		$targetSum += $equipment->target_rent;
+    	$targetIncludingOptionSum += $equipment->target_rent + $equipment->option_rent;
+	}
+	elseif ($equipment->what_if_action == 'add') {
+		$targetSum += $equipment->rent;
+    	$targetIncludingOptionSum += $equipment->rent + $equipment->option_rent;
+	}
+    ?>
+
+<?php endforeach ?>
+
+<?php
+$vat = round($targetIncludingOptionSum * $area->vat_rate, 2);
+$including_vat = $targetIncludingOptionSum + $vat;
+?>
+				<tr class="sum_row">
+					<td colspan="3" style="text-align: right"><?php echo $this->translate('Total current rent', 'ppit-equipment', $context->getLocale())?></td>
+					<td style="text-align: right"><?php echo $context->formatFloat($currentSum, 2).' €' ?></td>
+					<td style="text-align: right"><?php echo $context->formatFloat($currentIncludingOptionSum, 2).' €' ?></td>
+				</tr>
+
+				<tr class="sum_row">
+					<td colspan="3" style="text-align: right"><strong><?php echo $this->translate('Total target rent', 'ppit-equipment', $context->getLocale())?></strong></td>
+					<td style="text-align: right"><strong><?php echo $context->formatFloat($targetSum, 2).' €' ?></strong></td>
+					<td style="text-align: right"><strong><?php echo $context->formatFloat($targetIncludingOptionSum, 2).' €' ?></strong></td>
+				</tr>
+
+				<tr class="sum_row">
+					<td colspan="3" style="text-align: right;<?php echo ($targetSum > $currentSum) ? ' color: red' : ' color: green' ?>">
+						<?php echo $this->translate('Delta', 'ppit-equipment', $context->getLocale())?>
+					</td>
+					<td style="text-align: right;<?php echo ($targetSum > $currentSum) ? ' color: red' : ' color: green' ?>">
+						<?php echo $context->formatFloat($targetSum - $currentSum, 2).' €' ?>
+					</td>
+					<td style="text-align: right;<?php echo ($targetSum > $currentSum) ? ' color: red' : ' color: green' ?>">
+						<?php echo $context->formatFloat($targetIncludingOptionSum - $currentIncludingOptionSum, 2).' €' ?>
+					</td>
+				</tr>
+				
+				<tr class="sum_row">
+					<td colspan="3" style="text-align: right"><strong><?php echo $this->translate('VAT', 'ppit-master-data', $context->getLocale()).' '.($area->vat_rate*100).' %' ?></strong></td>
+					<td>&nbsp;</td>
+					<td style="text-align: right"><strong><?php echo $context->formatFloat($vat, 2).' €' ?></strong></td>
+				</tr>	
+
+				<tr class="sum_row">
+					<td colspan="3" style="text-align: right"><strong><?php echo $this->translate('Incl. tax', 'ppit-master-data', $context->getLocale())?></strong></td>
+					<td>&nbsp;</td>
+					<td style="text-align: right"><strong><?php echo $context->formatFloat($including_vat, 2).' €' ?></strong></td>
+				</tr>	
+
+				<tr>
+					<td colspan="2">&nbsp;</td>
+					<td colspan="3">
+						<input name="submit" type="submit" id="order_product_apply_button" class="btn btn-warning" value="<?php echo $this->translate('Generate the order', 'ppit-equipment', $context->getLocale()) ?>">
+						&nbsp;&nbsp;
+						<a id="cancel-anchor" href="#"><?php echo $this->translate('Cancel', 'ppit-core', $context->getLocale()) ?></a>
+					</td>
+				</tr>	
+			</table>
+
+			<div id="equipment-update"></div>
+
+<script id="equipment_list_script">
+
+$('#extra-policy-anchor').click(function () {
+	$('.extra_policy').show();
+});
+
+$('.extra_policy').hide();
+
+$('.submit_row').hide();
+
+// Equipments
+
+<?php foreach ($area->policyEquipments as $equipment) : ?>
+// What-if
+	eval(document.getElementById('equipment-anchor-<?php echo $equipment->id ?>-script').innerHTML);
+<?php endforeach ?>
+
+<?php foreach ($area->policySlots as $i => $productCategory) : ?>
+// Add
+	eval(document.getElementById('equipment-add-anchor-<?php echo $i ?>-script').innerHTML);
+<?php endforeach ?>
+
+// Add
+eval(document.getElementById('equipment-add-anchor-script').innerHTML);
+
+<?php foreach ($area->extraPolicyEquipments as $equipment) : ?>
+	$('.extra_policy').show();
+	//What-if
+	eval(document.getElementById('equipment-anchor-<?php echo $equipment->id ?>-script').innerHTML);
+<?php endforeach ?>
+
+</script>

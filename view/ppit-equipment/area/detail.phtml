@@ -1,0 +1,116 @@
+<?php 
+$spa = $context->isSpaMode();
+$anchorStyle = ($spa) ? $context->getAnchorStyle() : 'classic';
+$isDeletable = $area->isDeletable();
+?>
+
+<!-- Display header on MPA mode -->
+<?php if (!$spa) : ?>
+	<?php 
+		echo $this->partial('/partials/menu'); 
+	?>
+<div class="row">
+    <div class="col-md-6 col-md-offset-3">
+<?php endif;?>
+
+		<div class="panel panel-default">
+            <div class="panel-heading">
+				<strong><?php echo $this->translate('Area: detail', 'ppit-equipment', $context->getLocale())?></strong>
+ 				<div class="btn-group pull-right">
+					<?php echo $this->partial('/partials/anchor-widget.phtml', array(
+							'glyphicon' => 'glyphicon-remove',
+							'title' => $this->translate('Return to list', 'ppit-core', $context->getLocale()),
+							'id' => 'remove-anchor',
+							'anchorStyle' => $anchorStyle,
+							'spa' => $spa,
+					)) ?>
+ 				</div>
+			</div>
+           	<div class="panel-body">
+				<table class="table-condensed">
+					<tr>
+						<td>
+
+<!-- Update -->
+							<?php echo $this->partial('/partials/anchor-widget.phtml', array(
+									'glyphicon' => 'glyphicon-edit',
+									'title' => $this->translate('Update', 'ppit-core', $context->getLocale()),
+									'id' => 'update-anchor',
+									'anchorStyle' => $anchorStyle,
+									'spa' => $spa,
+							)) ?>
+
+<?php if ($id) : ?>
+<!-- Delete -->
+							<?php echo $this->partial('/partials/anchor-widget.phtml', array(
+									'glyphicon' => 'glyphicon-trash',
+									'title' => $this->translate('Delete', 'ppit-core', $context->getLocale()),
+									'id' => 'delete-anchor',
+									'anchorStyle' => $anchorStyle,
+									'class' => ($isDeletable) ? 'btn-danger' : 'btn-disabled',
+									'disabled' => !$isDeletable,
+									'spa' => $spa,
+							)) ?>
+<?php endif;?>
+						</td>
+					</tr>
+
+				</table>
+
+<!-- Equipment section -->
+				<div id="equipment_list"></div>
+
+			</div>
+		</div>
+<?php if (!$spa) : ?>
+	</div>
+</div>
+<?php endif;?>
+
+<script id='area/detail-script'>
+	
+// Close form
+<?php echo $this->partial('/partials/form-return-script', array(
+		'id' => 'remove-anchor',
+		'route' => $this->url('area/index'),
+		'spa' => $spa,
+)) ?>
+
+// Update
+<?php echo $this->partial('/partials/show-form-script', array(
+		'id' => 'update-anchor',
+		'route' => $this->url('area/update', array('id' => $id)),
+		'script' =>'area_update_script',
+		'spa' => $spa,
+)) ?>
+
+<?php if ($id) : ?>
+// Delete
+<?php echo $this->partial('/partials/show-form-script', array(
+		'id' => 'delete-anchor',
+		'route' => $this->url('area/delete', array('id' => $id)),
+		'script' =>'area_delete_script',
+		'spa' => $spa,
+)) ?>
+<?php endif?>
+	
+// Equipment section
+function getEquipmentList() {
+	var xhttp = new XMLHttpRequest();
+	xhttp.onreadystatechange = function() {
+		if (xhttp.readyState == 4 && xhttp.status == 200) {
+			document.getElementById('equipment_list').innerHTML = xhttp.responseText;
+<?php if ($config['ppitCoreSettings']['isTraceActive']) : ?>
+			console.log('getEquipmentList, route = ' + '<?php echo $this->url('equipment/list', array('area_id' => $area->id)) ?>');
+			console.log(xhttp.responseText);
+<?php endif;?>
+			eval(document.getElementById('equipment_list_script').innerHTML);
+		}
+	}
+	xhttp.open('GET', '<?php echo $this->url('equipment/list', array('area_id' => $area->id)) ?>', true);
+	xhttp.send();
+}
+
+getEquipmentList();
+
+</script>

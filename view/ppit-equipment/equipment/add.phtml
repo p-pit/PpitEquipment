@@ -1,0 +1,104 @@
+<?php 
+$spa = $context->isSpaMode();
+$anchorStyle = ($spa) ? $context->getAnchorStyle() : 'classic';
+?>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+		<strong><?php echo $this->translate('What-if', 'ppit-equipment', $context->getLocale())?>: <?php echo $this->translate('Add', 'ppit-core', $context->getLocale()) ?></strong>
+ 		<div class="btn-group pull-right">
+			<?php echo $this->partial('/partials/action-widget.phtml', array(
+					'context' => $context,
+					'target' => 'form_action',
+					'id' => 'add-remove-anchor',
+					'glyphicon' => 'glyphicon-remove',
+					'title' => $this->translate('Return to list', 'ppit-core', $context->getLocale()),
+					'disabled' => $equipment->lock,
+					'route' => 'area/detail',
+					'params' => array('id' => $area_id),
+			)) ?>
+ 		</div>
+	</div>
+	
+<!-- Form header -->
+<?php echo $this->partial('/partials/form-header', array(
+			'update_time' => $equipment->update_time,
+			'message' => $message,
+			'error' => $error,
+			'csrfForm' => $csrfForm,
+			'context' => $context,
+)) ?>
+
+<?php if ($message == 'OK' || !$context->isAllowed('equipment/lock')) $isDisabled = true; else $isDisabled = false; ?>
+
+<!-- What-if action -->
+<input type="hidden" id="what_if_action" name="what_if_action" value="add" />
+
+<!-- Product -->
+
+<?php
+	$properties = array();
+	foreach ($equipment->availableProducts as $product) $properties[$product->id] = $product->brand.' - '.$product->caption;
+	echo $this->partial('/partials/select-widget.phtml', array(
+		'property' => 'product_id',
+		'label' => $this->translate('Target model', 'ppit-equipment', $context->getLocale()),
+		'modalities' => $properties,
+		'value' => $equipment->product_id,
+		'isMandatory' => true,
+		'context' => $context,
+		'isDisabled' => $isDisabled,
+)); ?>
+
+<div class="form-group">
+	<label class="col-sm-5 control-label"><?php echo $this->translate('Options', 'ppit-master-data', $context->getLocale())?></label>
+</div>
+
+<div id="options">
+<?php foreach ($equipment->availableOptions as $option) : ?>
+
+	<!-- Option -->
+	<?php
+	echo $this->partial('/partials/checkbox-widget.phtml', array(
+		'property' => 'option_'.$option->id,
+		'label' => $option->caption.' - '.$option->description.' ('.number_format($option->prices[$area->place->tax_regime],2,',',' ').' €'.')',
+		'value' => null,
+		'context' => $context,
+		'isDisabled' => $isDisabled,
+	)); ?>
+<?php endforeach; ?>
+</div>
+
+<!-- Form footer -->
+<?php echo $this->partial('/partials/form-footer', array(
+		'context' => $context,
+		'prefix' => 'add-',
+		'message' => $message,
+		'target' => 'form_action',
+		'route' => 'area/update',
+		'params' => array('id' => $area_id),
+)) ?>
+
+</div>
+
+<script id='equipment/add-script'>
+
+// Close
+eval(document.getElementById('add-remove-anchor-script').innerHTML);
+//eval(document.getElementById('add-foot-return-anchor-script').innerHTML);
+eval(document.getElementById('add-cancel-anchor-script').innerHTML);
+
+<?php $properties = array('what_if_action' => 'hidden', 'product_id' => 'select', 'update_time' => 'hidden'); ?>
+
+// Submit
+<?php
+echo $this->partial('/partials/form-script', array(
+		'context' => $context,
+		'target' => 'equipment-update',
+		'formRoute' => $this->url('equipment/add', array('area_id' => $area_id, 'product_category_id' => $product_category_id)),
+		'formScript' =>'equipment/add-script',
+		'properties' => $properties,
+		'mainRoute' => null,
+		'hideForm' => false,
+)) ?>
+
+</script>

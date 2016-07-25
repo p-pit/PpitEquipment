@@ -1,0 +1,124 @@
+<?php
+$spa = $context->isSpaMode();
+$anchorStyle = ($spa) ? $context->getAnchorStyle() : 'classic';
+?>
+
+				<table class="table table-striped ppit_index">
+					<tr>
+						<th>&nbsp;</th>
+						<th>
+							<?php echo $this->partial('/partials/anchor-widget.phtml', array(
+									'text' => $this->translate('Caption', 'ppit-core', $context->getLocale()),
+									'id' => 'caption-anchor',
+									'anchorStyle' => $context->getAnchorStyle(),
+									'spa' => $spa,
+							)) ?>
+						</th>
+						<th>
+							<?php echo $this->partial('/partials/anchor-widget.phtml', array(
+									'text' => $this->translate('Site', 'ppit-core', $context->getLocale()),
+									'id' => 'site-caption-anchor',
+									'anchorStyle' => $context->getAnchorStyle(),
+									'spa' => $spa,
+							)) ?>
+						</th>
+					</tr>
+
+					<tr>
+						<td colspan="3">
+<!-- Add -->
+							<?php echo $this->partial('/partials/anchor-widget.phtml', array(
+									'glyphicon' => 'glyphicon-plus',
+									'title' => $this->translate('Add', 'ppit-core', $context->getLocale()),
+									'id' => 'add-anchor',
+									'anchorStyle' => $anchorStyle,
+									'spa' => $spa,
+									'showForm' => true,
+							)) ?>
+						</td>
+					</tr>
+
+<?php foreach ($areas as $area) : ?>
+					<tr>
+
+<!-- detail -->
+						<td>
+							<?php echo $this->partial('/partials/anchor-widget.phtml', array(
+									'glyphicon' => 'glyphicon-zoom-in',
+									'title' => $this->translate('Detail', 'ppit-core', $context->getLocale()),
+									'id' => 'detail-anchor-'.$area->id,
+									'anchorStyle' => $context->getAnchorStyle(),
+									'spa' => $spa,
+									'showForm' => true,
+							)) ?>
+						</td>
+
+						<td><?php echo $area->caption ?></td>
+						<td><?php echo $area->site_identifier.' - '.$area->site_caption ?></td>
+
+					</tr>
+<?php endforeach; ?>
+				</table>
+		
+<script id='area_list_script'>
+
+// Sort on caption
+$('#caption-anchor').click(function () {
+	reload(
+		'<?php echo $this->url('area/list').'?major=caption'.(($major == 'caption' && $dir =='ASC') ? '&dir=DESC' : '&dir=ASC') ?>',
+		'area_list_script',
+		'area_list'
+	);
+} );
+
+// Sort on site
+$('#site-caption-anchor').click(function () {
+	reload(
+		'<?php echo $this->url('area/list').'?major=site_caption'.(($major == 'site_caption' && $dir =='ASC') ? '&dir=DESC' : '&dir=ASC') ?>',
+		'area_list_script',
+		'area_list'
+	);
+} );
+
+<?php if ($spa && $anchorStyle == 'button') : ?>
+	$("#caption-anchor-glyphicon").removeClass("glyphicon-triangle-top");
+	$("#caption-anchor-glyphicon").removeClass("glyphicon-triangle-bottom");
+	$("#site-caption-anchor-glyphicon").removeClass("glyphicon-triangle-top");
+	$("#site-caption-anchor-glyphicon").removeClass("glyphicon-triangle-bottom");
+	<?php if (isset($major) && $major == 'caption') : ?>
+		<?php if ($dir == 'ASC') : ?>
+			$("#caption-anchor-glyphicon").addClass("glyphicon-triangle-top");
+		<?php else : ?>
+			$("#caption-anchor-glyphicon").addClass("glyphicon-triangle-bottom");
+		<?php endif;?>
+	<?php endif;?>
+	<?php if (isset($major) && $major == 'site_caption') : ?>
+		<?php if ($dir == 'ASC') : ?>
+			$("#site-caption-anchor-glyphicon").addClass("glyphicon-triangle-top");
+		<?php else : ?>
+			$("#site-caption-anchor-glyphicon").addClass("glyphicon-triangle-bottom");
+		<?php endif;?>
+	<?php endif;?>
+<?php endif;?>
+
+// Add
+<?php echo $this->partial('/partials/show-form-script', array(
+		'id' => 'add-anchor',
+		'route' => $this->url('area/update'),
+		'script' =>'area_update_script',
+		'spa' => $spa,
+)) ?>
+
+<?php foreach ($areas as $area) : ?>
+
+// Update
+	<?php echo $this->partial('/partials/show-form-script', array(
+			'id' => 'detail-anchor-'.$area->id,
+			'route' => $this->url('area/detail', array('id' => $area->id)),
+			'script' =>'area/detail-script',
+			'spa' => $spa,
+	)) ?>
+
+<?php endforeach;?>
+
+</script>

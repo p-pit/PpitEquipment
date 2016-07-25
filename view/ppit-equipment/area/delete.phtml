@@ -1,0 +1,139 @@
+<?php 
+$spa = $context->isSpaMode();
+$anchorStyle = ($spa) ? $context->getAnchorStyle() : 'classic';
+?>
+
+<!-- Display header on MPA mode -->
+<?php if (!$spa) : ?>
+	<?php 
+	echo $this->partial('/partials/menu'); 
+	?>
+<div class="row">
+    <div class="col-md-6 col-md-offset-3">
+<?php endif;?>
+
+		<div class="panel panel-default">
+            <div class="panel-heading">
+				<?php echo $this->translate('Area: delete', 'ppit-contact', $context->getLocale());?>
+ 				<div class="btn-group pull-right">
+					<?php echo $this->partial('/partials/anchor-widget.phtml', array(
+							'glyphicon' => 'glyphicon-remove',
+							'title' => $this->translate('Return to list', 'ppit-core', $context->getLocale()),
+							'id' => 'remove-anchor',
+							'anchorStyle' => $anchorStyle,
+							'spa' => $spa,
+					)) ?>
+ 				</div>
+			</div>
+           	<div class="panel-body">
+				<table class="table-condensed">
+					<tr>
+						<td colspan="2">
+
+<!-- Add -->
+							<?php echo $this->partial('/partials/anchor-widget.phtml', array(
+									'glyphicon' => 'glyphicon-plus',
+									'title' => $this->translate('Add', 'ppit-core', $context->getLocale()),
+									'id' => 'add-anchor',
+									'anchorStyle' => $anchorStyle,
+									'spa' => $spa,
+							)) ?>
+
+<!-- Update -->
+							<?php echo $this->partial('/partials/anchor-widget.phtml', array(
+									'glyphicon' => 'glyphicon-edit',
+									'title' => $this->translate('Update', 'ppit-core', $context->getLocale()),
+									'id' => 'update-anchor',
+									'anchorStyle' => $anchorStyle,
+									'spa' => $spa,
+							)) ?>
+						</td>
+					</tr>
+					<tr>
+						<td class="ppit-header-caption"><?php echo $this->translate('Name', 'ppit-core', $context->getLocale())?></td>
+						<td><?php echo $area->name ?>
+					<tr>
+
+				</table>
+           	
+<!-- Form header -->
+<?php echo $this->partial('/partials/form-header', array(
+	'id' => $id,
+	'update_time' => $area->update_time,
+	'message' => $message,
+	'error' => $error,
+	'csrfForm' => $csrfForm,
+	'context' => $context,
+)) ?>
+
+<!-- Form footer -->
+<?php echo $this->partial('/partials/form-footer', array(
+	'class' => 'btn-danger',
+	'message' => $message,
+	'context' => $context,
+)) ?>
+
+			</div>
+		</div>
+
+<?php if (!$context->isSpaMode()) : ?>
+	</div>
+</div>
+<?php endif;?>
+
+<script id='area_delete_script'>
+
+// Close form
+<?php echo $this->partial('/partials/form-return-script', array(
+		'id' => 'remove-anchor',
+		'route' => $this->url('area/index'),
+		'spa' => $spa,
+)) ?>
+
+// Add
+<?php echo $this->partial('/partials/show-form-script', array(
+		'id' => 'add-anchor',
+		'route' => $this->url('area/update'),
+		'script' => 'area_update_script',
+		'spa' => $spa,
+)) ?>
+
+// Update
+<?php echo $this->partial('/partials/show-form-script', array(
+		'id' => 'update-anchor',
+		'route' => $this->url('area/update', array('id' => $id)),
+		'script' =>'area_update_script',
+		'spa' => $spa,
+)) ?>
+
+<?php if ($message == 'OK' || !$context->isAllowed('area/update')) : ?>
+
+<?php echo $this->partial('/partials/form-return-script', array(
+		'id' => 'foot-return-anchor',
+		'route' => $this->url('area/index'),
+		'spa' => $spa,
+)) ?>
+
+<?php else : ?>
+
+<?php echo $this->partial('/partials/form-return-script', array(
+		'id' => 'cancel-anchor',
+		'route' => $this->url('area/index'),
+		'spa' => $spa,
+)) ?>
+
+// Submit
+<?php echo $this->partial('/partials/form-button-script', array(
+		'context' => $context,
+		'id' => 'submit-button',
+		'formRoute' => $this->url('area/delete', array('id' => $id)),
+		'formScript' =>'area_delete_script',
+		'properties' => array('update_time' => 'hidden'),
+		'mainRoute' => $this->url('area/index'),
+		'mainScript' =>'area_index_script',
+		'hideForm' => true,
+)) ?>
+
+<?php endif;?>
+
+</script>
