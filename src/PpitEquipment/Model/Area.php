@@ -3,9 +3,9 @@ namespace PpitEquipment\Model;
 
 use PpitCore\Model\Context;
 use PpitCore\Model\Generic;
+use PpitCore\Model\Place;
 use PpitEquipment\Model\Equipment;
 use PpitMasterData\Model\OrgUnit;
-use PpitMasterData\Model\Place;
 use PpitMasterData\Model\ProductCategory;
 use PpitMasterData\Model\Product;
 use Zend\Db\Sql\Where;

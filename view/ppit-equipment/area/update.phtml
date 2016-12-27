@@ -1,5 +1,5 @@
 <?php 
-$spa = $context->isSpaMode();
+$spa = true;
 $anchorStyle = ($spa) ? $context->getAnchorStyle() : 'classic';
 $isDeletable = $area->isDeletable();
 ?>
@@ -182,8 +182,6 @@ $isDeletable = $area->isDeletable();
 	</div>
 </div>
 <?php endif;?>
-
-<?php if (!$context->isSpaMode()) echo $this->partial('partials/view-controller') ?>
 
 <script id='area_update_script'>
 

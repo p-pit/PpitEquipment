@@ -21,7 +21,7 @@ class AreaController extends AbstractActionController
     			'context' => $context,
 				'config' => $context->getconfig(),
     	));
-   		if ($context->isSpaMode()) $view->setTerminal(true);
+   		$view->setTerminal(true);
    		return $view;
     }
 
@@ -96,7 +96,7 @@ class AreaController extends AbstractActionController
     			'area' => $area,
     			'id' => $id,
     	));
-    	if ($context->isSpaMode()) $view->setTerminal(true);
+    	$view->setTerminal(true);
     	return $view;
     }
 
@@ -152,7 +152,7 @@ class AreaController extends AbstractActionController
     			'message' => $message,
     			'error' => $error
     	));
-   		if ($context->isSpaMode()) $view->setTerminal(true);
+   		$view->setTerminal(true);
    		return $view;
     }
     
@@ -210,7 +210,7 @@ class AreaController extends AbstractActionController
     		'message' => $message,
     		'error' => $error,
     	));
-   		if ($context->isSpaMode()) $view->setTerminal(true);
+   		$view->setTerminal(true);
    		return $view;
     }
 }

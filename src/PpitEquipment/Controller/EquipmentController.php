@@ -41,7 +41,7 @@ class EquipmentController extends AbstractActionController
 				'config' => $context->getconfig(),
 				'area' => $area,
 		));
-		if ($context->isSpaMode()) $view->setTerminal(true);
+		$view->setTerminal(true);
 		return $view;
 	}
 
@@ -295,7 +295,7 @@ class EquipmentController extends AbstractActionController
     		'error' => $error,
     		'message' => $message
     	));
-		if ($context->isSpaMode()) $view->setTerminal(true);
+		$view->setTerminal(true);
        	return $view;
     }
 }
